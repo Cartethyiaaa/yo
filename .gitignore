@@ -1,0 +1,4 @@
+*.img
+*.cpio
+*.bak
+.DS_Store

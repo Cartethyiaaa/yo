@@ -1,0 +1,96 @@
+import /init.tee.rc
+import /init.device.rc
+
+on init
+    setprop sys.usb.configfs 1
+    setprop sys.usb.controller "musb-hdrc"
+    setprop sys.usb.ffs.aio_compat 0
+    setprop servicemanager.ready true
+    setprop servicemanager.installed true
+    setprop hwservicemanager.ready true
+
+on fs
+    wait /dev/block/platform/soc/11270000.ufshci
+    symlink /dev/block/platform/soc/11270000.ufshci /dev/block/bootdevice
+    install_keyring
+    mkdir /metadata 0755 root root
+    mount ext4 /dev/block/by-name/metadata /metadata noatime nosuid nodev
+    mkdir /mnt/vendor/persist 0755 root root
+    mount ext4 /dev/block/by-name/persist /mnt/vendor/persist noatime nosuid nodev
+    mkdir /mnt/vendor/protect_f 0755 root root
+    mount ext4 /dev/block/by-name/protect1 /mnt/vendor/protect_f noatime nosuid nodev
+    mkdir /mnt/vendor/protect_s 0755 root root
+    mount ext4 /dev/block/by-name/protect2 /mnt/vendor/protect_s noatime nosuid nodev
+    mkdir /mnt/vendor/nvdata 0755 root root
+    mount ext4 /dev/block/by-name/nvdata /mnt/vendor/nvdata noatime nosuid nodev
+    mkdir /mnt/vendor/nvcfg 0755 root root
+    mount ext4 /dev/block/by-name/nvcfg /mnt/vendor/nvcfg noatime nosuid nodev
+    setprop crypto.ready 1
+
+on boot
+    insmod /lib/modules/opsMediator.ko
+    insmod /lib/modules/adaptive-ts.ko
+    insmod /lib/modules/focaltech_ft3683g.ko
+    insmod /lib/modules/chipsemi_chsc5xxx_old.ko
+    setprop sys.usb.config adb
+    start mtk.plpath.utils.link
+
+on post-fs-data
+    start health-hal-2-1
+
+on property:persist.vendor.mtk.pl_lnk=1
+    symlink /dev/block/mapper/pl_a /dev/block/by-name/preloader_raw_a
+    symlink /dev/block/mapper/pl_b /dev/block/by-name/preloader_raw_b
+    symlink /dev/block/mapper/pl_a /dev/block/platform/bootdevice/by-name/preloader_raw_a
+    symlink /dev/block/mapper/pl_b /dev/block/platform/bootdevice/by-name/preloader_raw_b
+
+    symlink /dev/block/by-name/lk1 /dev/block/by-name/bootloader1
+    symlink /dev/block/by-name/lk2 /dev/block/by-name/bootloader2
+
+on property:vendor.mtk.boot0_linka=1
+    symlink /dev/block/sda /dev/block/mmcblk0boot0
+
+on property:vendor.mtk.boot0_linkb=1
+    symlink /dev/block/sdb /dev/block/mmcblk0boot0
+
+on property:vendor.mtk.boot0_linkc=1
+    symlink /dev/block/sdc /dev/block/mmcblk0boot0
+
+on property:vendor.mtk.boot1_linka=1
+    symlink /dev/block/sda /dev/block/mmcblk0boot1
+
+on property:vendor.mtk.boot1_linkb=1
+    symlink /dev/block/sdb /dev/block/mmcblk0boot1
+
+on property:vendor.mtk.boot1_linkc=1
+    symlink /dev/block/sdc /dev/block/mmcblk0boot1
+
+service mtk.plpath.utils.link /system/bin/mtk_plpath_utils
+    class main
+    user root
+    group root system
+    oneshot
+    disabled
+    seclabel u:r:recovery:s0
+
+service vendor.keymint-trustonic /vendor/bin/hw/android.hardware.security.keymint@3.0-service.trustonic --rkp_version=v1
+    class early_hal
+    user root
+    group root system
+    disabled
+    seclabel u:r:recovery:s0
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64
+
+service vendor.gatekeeper-default /vendor/bin/hw/android.hardware.gatekeeper-service.trustonic
+    class early_hal
+    user root
+    group root system
+    disabled
+    seclabel u:r:recovery:s0
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64
+
+on property:crypto.ready=1
+    start mobicore
+    start vendor.keymint-trustonic
+    start vendor.gatekeeper-default
+    start keystore2
