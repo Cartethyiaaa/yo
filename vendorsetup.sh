@@ -6,6 +6,4 @@
 #
 
 add_lunch_combo fox_X6886-eng
-add_lunch_combo fox_X6886-userdebug
-add_lunch_combo omni_X6886-eng
-add_lunch_combo omni_X6886-userdebug
+add_lunch_combo pb_X6886-eng
