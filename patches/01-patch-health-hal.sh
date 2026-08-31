@@ -2,10 +2,10 @@
 
 BP_FILE="hardware/interfaces/health/aidl/default/Android.bp"
 
-# Verify the file exists before attempting to patch it
 if [ ! -f "$BP_FILE" ]; then
-    echo "[-] Error: Cannot find $BP_FILE. Ensure your path is correct."
-    exit 1
+    echo "[!] $BP_FILE not found — likely an Android 12.x tree (HIDL 2.1 health HAL, no AIDL path)."
+    echo "[!] Skipping this patch, nothing to do."
+    exit 0
 fi
 
 echo "[*] Creating backup of the original Android.bp..."
