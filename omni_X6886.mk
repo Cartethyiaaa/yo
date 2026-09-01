@@ -11,7 +11,7 @@ $(call inherit-product, device/infinix/X6886/device.mk)
 $(call inherit-product, vendor/twrp/config/common.mk)
 
 # Product Specifics
-PRODUCT_NAME := ofox_X6886
+PRODUCT_NAME := omni_X6886
 PRODUCT_DEVICE := X6886
 PRODUCT_BRAND := Infinix
 PRODUCT_MODEL := Infinix X6886
