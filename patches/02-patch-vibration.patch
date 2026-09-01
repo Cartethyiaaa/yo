@@ -10,7 +10,7 @@
  
  #ifndef SYN_REPORT
  #define SYN_REPORT          0x00
-@@ -182,9 +181,11 @@
+@@ -182,9 +181,12 @@
          write_to_file(VIBRATOR_TIMEOUT_FILE, tout);
      }
  #else
